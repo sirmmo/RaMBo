@@ -1,5 +1,6 @@
 from django.db import models
 from resources.models import *
+from django.contrib.auth.models import User
 
 class Booking(models.Model):
 	resource = models.ForeignKey(Resource)
@@ -19,17 +20,17 @@ class Booking(models.Model):
 
 	
 class UserConnection(models.Model):
-	owner = models.ForeignKey(User)
-	target = models.ForeignKey(User)
+	owner = models.ForeignKey(User, related_name="sharing")
+	target = models.ForeignKey(User, related_name ="shared")
 
-	shared_resources = models.ManyToMany(Resource)
+	shared_resources = models.ManyToManyField(Resource)
 
 	def __unicode__(self):
 		return "%s => %s [%s]" % (self.requester, self.owner, ", ".join(self.shared_resources.all()))
 
 class ConnectionRequest(models.Model):
-	requester = models.ForeignKey(User)
-	owner = models.ForeignKey(User)
+	requester = models.ForeignKey(User, related_name="requests_sent")
+	owner = models.ForeignKey(User, related_name="requests_to_answer")
 
 	def accept(self, resources):
 		u = UserConnection()
