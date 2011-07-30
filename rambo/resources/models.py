@@ -23,3 +23,12 @@ class Resource(models.Model):
 
 	def __unicode__(self):
 		return self.name
+
+class ResourceProperty(models.Model):
+	name = models.CharField(max_length=250)
+	value=models.CharField(max_length=250)
+
+	resource = models.ForeignKey(Resource, related_name="properties")
+
+	def __unicode__(self):
+		return "%s.%s = %s" % (self.resource, self.name, self.value)
