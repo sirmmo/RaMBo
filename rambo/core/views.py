@@ -1,4 +1,6 @@
 from django.http import HttpResponse
+from django.shortcuts import render_to_response
+from django.core.urlresolvers import reverse
 
 from utils import * 
 
@@ -8,7 +10,10 @@ except:
 	import simplejson as json
 
 def index(request):
-	return HttpResponse("index")
+	return render_to_response("index.html", {
+		'get_user_resources':reverse("get_resources", kwargs={"user":request.user.username}),
+		'get_shared_resources':reverse("get_shared_resources", kwargs={"user":request.user.username}),
+	})
 
 # Create your views here.
 

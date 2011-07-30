@@ -3,18 +3,138 @@
 <head>
 <title>RaMBO</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-<style>
+<script src="https://raw.github.com/cowboy/jquery-hashchange/master/jquery.ba-hashchange.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.14/jquery-ui.min.js"></script>
+<script src="http://arshaw.com/js/fullcalendar-1.5.1/fullcalendar/fullcalendar.min.js"></script>
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/ui-lightness/jquery-ui.css" type="text/css" rel="Stylesheet" />
 
+<link rel="stylesheet" type="text/css" href="http://arshaw.com/js/fullcalendar-1.5.1/fullcalendar/fullcalendar.css" />
+<style>
+body{
+	margin:0 0 0 0;
+	font-family: calibri, sans-serif;
+}
+#header{
+	height:100px;
+	display:block;
+}
+#footer{
+	display:block;
+	clear:both;
+}
+#resource_bar{
+	float:left;
+	width:250px;
+	padding-left:3px;
+}
+#resource_calendar{
+	float:left;
+	width:850px;
+}
+.bar{
+	padding-bottom:10px;
+}
+.bar_title{
+	font-size:1.5em;
+	display:inline-block;
+}
+#add_resource{
+	float:right;
+	display:block;
+	width:16px;
+	height:16px;
+}
 </style>
+<script>
+render_resource = function(data){
+	var r = $("<li></li>");
+	var a = $("<a></a>");
+	if ('owner' in data)
+	r.append(data['owner'] + ": ");
+	a.attr('href',"#"+ data['url']);
+	a.attr('class', 'resource');
+	a.append(data['name']);
+	r.append(a);
+	return r;
+}
+
+render_resources = function(data){
+	var r = $('<ul></ul>');
+	for(var k in data){
+		var value = data[k];
+		r.append(render_resource(value));
+	}
+	return r.html();
+}
+get_data = function(data){
+	if (data['type'] == "error"){
+		var d = $('<div></div>');
+		d.append(data['content']);
+		d.dialog({
+			modal:true
+		});
+	} else
+		return data['content']
+}
+
+$(function(){
+		
+
+	$.getJSON('{{get_user_resources}}', function(data){
+	if(data['type'] == "response"){
+	$('#own_resources').append(render_resources(data['content']));
+	$('.resource').draggable({
+		revert:true,
+		revertDuration:0
+	});
+	}else;		
+	});
+	$.getJSON('{{get_shared_resources}}', function(data){
+	if(data['type'] == "response")
+	{$('#shared_resources').append(render_resources(data['content']));
+	$('.resource').draggable({
+		revert:true,
+		revertDuration:0
+	});
+	}else;
+	});
+	$(window).hashchange(function(){
+		nurl = location.hash.split('#')[1];
+		alert(nurl);
+	});
+	$('#resource_calendar').fullCalendar({
+		droppable:true,
+		dropaccept:".resource",
+		drop: function(date, allDay){
+			alert("Dropped " +$(this).attr('href')+ " on " + date + " with allDay=" + allDay);
+		}
+	});
+
+	$('#add_resource').click(function(){
+		$.get('', function(data){
+			$(data).dialog({
+				modal:true
+			});
+		});
+	});
+});
+</script>
 </head>
 
 <body>
-<div id="header"></div>
-<div id="content">
-	<div id="resource_bar"></div>
-	<div id="resource_calendar"></div>
+<div id="header">RaMBO</div>
+<div id="toolbar"><span id="login">Login</span> <span id="register">Register</span></div>
+<div id="resource_bar">
+	<div class="bar" id="own_resources">
+		<div class="bar_title">Own Resources</div>
+		<div id="add_resource">+</div>
+	</div>
+	<div class="bar" id="shared_resources">
+		<div class="bar_title">Shared Resources</div>
+	</div>
 </div>
-<div id="footer"></div>
+<div id="resource_calendar"></div>
+<div id="footer">MMo.it</div>
 </body>
 
 </html>

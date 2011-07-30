@@ -34,6 +34,13 @@ def add_resource(request):
 		return error(str(e))
 
 @login_required
+def add_resource_template(request):
+	try:
+		return response(get_template())
+	except Exception as e:
+		return error(str(e))
+
+@login_required
 def remove_resource(request,user,  resource):
 	try:
 		return response(do_remove_resource(request.user, user, data))
@@ -59,7 +66,7 @@ def op_category(request, op):
 @login_required
 def get_categories(request):
 	try:
-		return response(do_get_categories(request.user.username))
+		return response(do_get_categories())
 	except Exception as e:
 		return error(str(e))
 
@@ -80,5 +87,9 @@ def respond_share_request(request):
 
 @login_required
 def get_shared_resources(request, user):
-        pass
+        try:
+		return response(do_get_shared_resources(request.user.username))
+	except Exception as e:
+		return error(str(e))
+
 

@@ -6,12 +6,15 @@ from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 
 class ResourceCategory(models.Model):
-	parent = models.ForeignKey('ResourceCategory', null=True, default=None)
+	parent = models.ForeignKey('ResourceCategory', null=True,blank=True, default=None)
 	name = models.CharField(max_length=250)
 	slug = models.SlugField(blank=True, null=True, unique=True)
 	
 	def save(self, *args, **kwargs):
-		slug = slugify(self.name)
+
+		self.slug = slugify(self.name)
+
+		super(ResourceCategory, self).save(self, *args, **kwargs)
 
 	def __unicode__(self):
 		return self.name
@@ -26,7 +29,8 @@ class Resource(models.Model):
 	def __unicode__(self):
 		return self.name
 	def url(self):
-		return reverse('get_resource', kwargs={'user':self.owner.username, 'name':self.name})
+		kwa = {'user':self.owner.username, 'name':self.name}
+		return reverse('get_resource',args=[],kwargs={'user':self.owner.username, 'resource':self.name})
 	class Meta:
 		unique_together= ('owner', 'name')
 
@@ -44,10 +48,10 @@ class UserConnection(models.Model):
         owner = models.ForeignKey(User, related_name="sharing")
         target = models.ForeignKey(User, related_name ="shared")
 
-        shared_resources = models.ManyToManyField(Resource)
+        shared_resource = models.ForeignKey(Resource,related_name="shared_by")
 
         def __unicode__(self):
-                return "%s => %s [%s]" % (self.requester, self.owner, ", ".join(self.shared_resources.all()))
+                return "%s => %s [%s]" % (self.owner, self.target, ", ".join([str(r) for r in self.shared_resources.all()]))
 
 class ConnectionRequest(models.Model):
         requester = models.ForeignKey(User, related_name="requests_sent")
