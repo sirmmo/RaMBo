@@ -89,7 +89,7 @@ SECRET_KEY = '2*8v)zxs2n_w8u+h638=vx-ei6!2#jtr@u7*8f25i1v$t1=rhq'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -103,9 +103,7 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
+    "/var/www/RaMBo/rambo/templates",
 )
 
 INSTALLED_APPS = (
@@ -119,7 +117,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 	'core',
 	'resources',
-	'ui',
+	
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )

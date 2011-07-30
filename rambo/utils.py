@@ -13,5 +13,3 @@ def response(msg):
 
 def error(msg):
 	return __message(msg, "error")
-
-

@@ -6,12 +6,12 @@ from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 
 class ResourceCategory(models.Model):
-	parent = models.ForeignKey('ResourceCategory')
+	parent = models.ForeignKey('ResourceCategory', null=True, default=None)
 	name = models.CharField(max_length=250)
 	slug = models.SlugField(blank=True, null=True, unique=True)
 	
 	def save(self, *args, **kwargs):
-		slug = slugify(name)
+		slug = slugify(self.name)
 
 	def __unicode__(self):
 		return self.name
@@ -26,7 +26,7 @@ class Resource(models.Model):
 	def __unicode__(self):
 		return self.name
 	def url(self):
-		return reverse('get_resource', kwargs={'user':self.owner.username, 'name':self.name}
+		return reverse('get_resource', kwargs={'user':self.owner.username, 'name':self.name})
 	class Meta:
 		unique_together= ('owner', 'name')
 
