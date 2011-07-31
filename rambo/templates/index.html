@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<title>RaMBO</title>
+<title>RaMBo</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 <script src="https://raw.github.com/cowboy/jquery-hashchange/master/jquery.ba-hashchange.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.14/jquery-ui.min.js"></script>
@@ -46,8 +46,8 @@ body{
 #add_resource{
 	float:right;
 	display:block;
-	width:16px;
-	height:16px;
+	padding-top:3px;
+	padding-right:16px;
 }
 .share{
 	float:right;	
@@ -101,6 +101,8 @@ drag_start = function(event, ui){
 	});
 }
 
+$.active_resource= "";
+
 $(function(){
 		
 
@@ -129,44 +131,65 @@ $(function(){
 	$(window).hashchange(function(){
 		nurl = location.hash.split('#')[1];
 		$.getJSON(nurl, function(data){
-			alert(data);
+			try{
+				$('#resource_calendar').fullCalendar('removeEvents');
+				$('#resource_calendar').fullCalendar( 'removeEventSource',$.active_resource );
+			} catch(e){}
+			$.active_resource = data['content']['booking_url'];
+			$('#resource_calendar').fullCalendar('addEventSource',$.active_resource);
+			$('#resource_calendar').fullCalendar('refetchEvents');
 		});
 	});
+	$(window).hashchange();
 	$('#resource_calendar').fullCalendar({
 		droppable:true,
 		dropaccept:".resource",
 		drop: function(date, allDay){
 			var h = $(this).attr('href').split('#')[1];
-			alert("Dropped " +$(this).attr('href')+ " on " + date + " with allDay=" + allDay);
+			var name = $(this).text();
 			$.getJSON(h, function(data){
-				var date_string = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
+				var date_string = date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate();
 				var time_string = date.getHours() + ":" + date.getMinutes();
-				var new_url = data['add_booking'];
-				$.get(new_url, {
-					'date_start':date_string, 
-					'time_start':time_string
-				}, function(data){
-					$(data).dialog({
-						buttons:{
-							'Ok':function(){
-								$.post(new_url, $(this).find('form').serialize(), function(data){
-									alert(data)
-								});
-								$(this).dialog('destroy');
-							}, 
-							'Cancel':function(){
-								$(this).dialog('destroy');
-							}
+				var new_url = data['content']['add_booking'];
+				var eb = $('#add_event_box').clone(true);
+				eb.find('.book_date').datepicker({
+					onSelect:function(dateText, inst){
+						var date = new Date(dateText);
+						$(this).val(date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate());
+					}
+				});
+				eb.find('[name=book_start_date]').val(date_string);
+				eb.find('[name=book_start_time]').val(time_string);
+				eb.find('[name=book_resource]').val(name);
+				eb.dialog({
+					width:350,
+					buttons:{
+						'Ok':function(){
+							booking_data = {};
+							booking_data['description'] = $(this).find('[name=book_description]').val();
+							booking_data['date_start'] = $(this).find('[name=book_start_date]').val();
+							booking_data['date_end'] = $(this).find('[name=book_end_date]').val();
+							booking_data['time_start'] = $(this).find('[name=book_start_time]').val();
+							booking_data['time_end'] = $(this).find('[name=book_end_time]').val();
+							booking_data['repeat'] = false;
+			
+							$.get(new_url, booking_data, function(data){
+								alert(data)
+							});
+							$(this).dialog('destroy');
+						}, 
+						'Cancel':function(){
+							$(this).dialog('destroy');
 						}
-					});
-				});	
+					}
+				});
 			});
 		},
 		defaultView:'agendaWeek',
 		header:{
-			left:'title',
-			center:'month,agendaWeek,agendaDay',
-			right:  'today prev,next'
+			left:'prev,next today',
+			center:'title',
+			right:  'month,agendaWeek,agendaDay'
 		},
 		selectable:true,
 		selectHelper:true,
@@ -174,9 +197,8 @@ $(function(){
 		}
 		
 	});
-
 	$('#add_resource_box').hide();
-
+	$('#add_event_box').hide();
 	$('#add_resource').click(function(){
 	        var dd = $(this);
 	        var p = dd.position();
@@ -185,7 +207,22 @@ $(function(){
 	                title:"Add Resource",
 	                buttons:{
 	                        'Ok':function(){
-	
+					$.get('{% url add_resource %}', {
+										'name':$(this).find('input[name=resource_name]').val(), 
+										'icon':$(this).find('input[name=resource_icon]').val()
+						}, function(data){
+						$('#own_resources').contents().not('.bar_title').not('#add_resource').remove();
+						$.getJSON('{{get_user_resources}}', function(data){
+					                if(data['type'] == "response"){
+					                        $('#own_resources').append(render_resources(data['content']));
+					                        $('.resource').draggable({
+					                                revert:true,
+			        	                        	revertDuration:0,
+			                	        	        start:drag_start
+			                		        });
+				        	        }else;
+					        });
+					});
 	                                $(this).dialog('destroy');
 	                        },
 	                        'Cancel':function(){
@@ -237,11 +274,11 @@ $(function(){
 
 <body>
 <div id="header">RaMBO</div>
-<div id="toolbar"><span id="login">Login</span> <span id="register">Register</span></div>
+<div id="toolbar"><span id="login"><a href="/logout">Logout</a></span></div>
 <div id="resource_bar">
 	<div class="bar" id="own_resources">
 		<div class="bar_title">Own Resources</div>
-		<div id="add_resource">+</div>
+		<div id="add_resource"><a href="#">Add</a></div>
 	</div>
 	<div class="bar" id="shared_resources">
 		<div class="bar_title">Shared Resources</div>
@@ -252,7 +289,7 @@ $(function(){
 
 <div id="add_resource_box">
 	<label for="resource_name">Resource Name: </label><input type="text" name="resource_name"></input><br/>
-	<label for="resource_icon">Resouce Icon:</label>
+<!--	<label for="resource_icon">Resouce Icon:</label>
 	<table >
 	<tr>
 		<td>
@@ -265,7 +302,21 @@ $(function(){
 		<input type="radio" name="resource_icon" value="generic.png"><img src="#" width="24" height="24" /></input>
 		</td>
 	</tr>
-	</table>
+	</table>-->
+</div>
+
+<div id="add_event_box">
+<p>
+	<label for="book_resource">Resource Name: </label><input class="book_resource" type="text" name="book_resource"></input><br/>
+	<label for="book_description">Description: </label><br />
+	<textarea rows="2" cols="20" name="book_description"></textarea><br/>
+</p><p>
+	<label for="book_start_date">Start Date: </label><input class="book_date" type="text" name="book_start_date"></input><br/>
+	<label for="book_start_time">Start Time: </label><input class="book_start_time" type="text" name="book_start_time" value="00:00"></input><br/>
+</p><p>
+	<label for="book_end_date">End Date: </label><input class="book_date" type="text" name="book_end_date"></input><br/>
+	<label for="book_end_time">End Time: </label><input class="book_start_date" type="text" name="book_end_time" value="23:59"></input><br/>
+</p>
 </div>
 </body>
 

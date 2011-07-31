@@ -24,12 +24,10 @@ def get_resource(request, user, resource):
 
 @login_required
 def add_resource(request):
-	data = request.REQUEST.get('data', None)
-	if data is None:
-		return error("data must be set")
-	data = json.loads(data)
+	name = request.REQUEST.get('name', None)
+	icon = request.REQUEST.get('icon', None)
 	try:
-		return response(do_add_resource(request.user.username, data))
+		return response(do_add_resource(request.user.username, name, icon))
 	except Exception as e:
 		return error(str(e))
 

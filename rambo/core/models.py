@@ -10,7 +10,7 @@ class Booking(models.Model):
 	date_start = models.DateField()
 	date_end = models.DateField()
 
-	time_start = models.TimeField()
+	time_start = models.TimeField(auto_now=True)
 	time_end = models.TimeField()
 
 	REPETITION_CHOICES = (

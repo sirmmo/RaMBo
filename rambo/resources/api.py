@@ -11,7 +11,6 @@ def do_get_resource(user, resource_name):
 	
 	pu = {	
 		'slug': str(r.slug),
-		'category':str(r.category),
 		'owner':str(r.owner),
 		'name':str(r.name),
 		'icon':str(r.icon),
@@ -32,12 +31,11 @@ def do_get_resource(user, resource_name):
 def get_template():
 	return {'name':'', 'icon':'','category':''}
 
-def do_add_resource(user, data):
+def do_add_resource(user, name, icon):
 	r = Resource()
 	r.owner = User.objects.get(username = user)
-	r.name = data['name']
-	r.icon = data['icon']
-	r.category = ResourceCategory.objects.get(slug=data['category'])
+	r.name = name
+	r.icon = icon
 	r.save()
 	return r.id
 
