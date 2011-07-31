@@ -177,6 +177,7 @@ $(function(){
 								alert(data)
 							});
 							$(this).dialog('destroy');
+				                        $('#resource_calendar').fullCalendar('refetchEvents');
 						}, 
 						'Cancel':function(){
 							$(this).dialog('destroy');
