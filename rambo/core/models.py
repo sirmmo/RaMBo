@@ -3,7 +3,10 @@ from resources.models import *
 from django.contrib.auth.models import User
 
 class Booking(models.Model):
-	resource = models.URLField()
+	user = models.ForeignKey(User)
+	resource = models.ForeignKey(Resource)
+	description = models.TextField()
+
 	date_start = models.DateField()
 	date_end = models.DateField()
 
