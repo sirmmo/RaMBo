@@ -1,3 +1,33 @@
+<html>
+<head>
+	<title>RaMBo</title>
+	<link href='http://fonts.googleapis.com/css?family=Kelly+Slab|Leckerli+One' rel='stylesheet' type='text/css'>
+	<style>
+body{
+	margin:0 0 0 0;
+	font-family: calibri, sans-serif;
+}
+#header{
+	height:100px;
+	display:block;
+	font-family: 'Leckerli One', cursive;
+	font-size:70px;
+	padding-left:25px;
+	border-bottom:1px solid gray;
+}
+#content{
+	width:250px;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+	</style>
+</head>
+<body>
+<div id="header">
+	RaMBo
+</div>
+<div id="content">
 <form method="post" action="">
   {{ auth_form.non_field_errors }}
   <p>
@@ -6,11 +36,20 @@
   </p>
   <p>
     {{ auth_form.password.errors }}
-    <label for="id_password">Password:</label> <input type="text" name="password" id="id_password"> 
+    <label for="id_password">Password:</label> <input type="password" name="password" id="id_password"> 
   </p>
   <p>
     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-    <input type="submit" value="Log in">
+    <input type="submit" name="submit" value="Log in">
     <input type="hidden" name="next" value="{{ next }}">
   </p>
+
+  <p>
+    <label for="id_c_password">Confirm Password:</label> <input type="password" name="c_password" id="id_c_password">
+  </p>
+  <p>
+    <input type="submit" name="register" value="Register">
+  </p>
 </form>
+</div>
+</body>

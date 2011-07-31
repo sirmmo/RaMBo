@@ -3,20 +3,8 @@ from django.contrib.admin.models import User
 from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 
-class ResourceCategory(models.Model):
-	parent = models.ForeignKey('ResourceCategory', null=True,blank=True, default=None)
-	name = models.CharField(max_length=250)
-	slug = models.SlugField(blank=True, null=True, unique=True)
-	def save(self, *args, **kwargs):
-		self.slug = slugify(self.name)
-		super(ResourceCategory, self).save(self, *args, **kwargs)
-
-	def __unicode__(self):
-		return self.name
-
 class Resource(models.Model):
 	owner = models.ForeignKey(User)
-	category=models.ForeignKey(ResourceCategory)
 	name = models.CharField(max_length = 250)
 	slug = models.SlugField(blank=True, null=True, unique=True)
 	icon = models.ImageField(upload_to="icons")

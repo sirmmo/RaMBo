@@ -9,7 +9,7 @@
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/ui-lightness/jquery-ui.css" type="text/css" rel="Stylesheet" />
 
 <link rel="stylesheet" type="text/css" href="http://arshaw.com/js/fullcalendar-1.5.1/fullcalendar/fullcalendar.css" />
-<link href='http://fonts.googleapis.com/css?family=Dawning+of+a+New+Day|Meddon' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Kelly+Slab|Leckerli+One' rel='stylesheet' type='text/css'>
 <style>
 body{
 	margin:0 0 0 0;
@@ -18,7 +18,7 @@ body{
 #header{
 	height:100px;
 	display:block;
-	font-family: 'Dawning of a New Day', cursive;
+	font-family: 'Leckerli One', cursive;
 	font-size:70px;
 	padding-left:25px;
 }
@@ -39,6 +39,7 @@ body{
 	padding-bottom:10px;
 }
 .bar_title{
+	font-family:'Kelly Slab', serif;
 	font-size:1.5em;
 	display:inline-block;
 }
@@ -141,9 +142,23 @@ $(function(){
 				var date_string = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
 				var time_string = date.getHours() + ":" + date.getMinutes();
 				var new_url = data['add_booking'];
-				$.getJSON(new_url, {
+				$.get(new_url, {
 					'date_start':date_string, 
 					'time_start':time_string
+				}, function(data){
+					$(data).dialog({
+						buttons:{
+							'Ok':function(){
+								$.post(new_url, $(this).find('form').serialize(), function(data){
+									alert(data)
+								});
+								$(this).dialog('destroy');
+							}, 
+							'Cancel':function(){
+								$(this).dialog('destroy');
+							}
+						}
+					});
 				});	
 			});
 		},
@@ -154,17 +169,35 @@ $(function(){
 			right:  'today prev,next'
 		},
 		selectable:true,
-		selectHelper:true
+		selectHelper:true,
+		select:function(startDate, endDate, allDay){
+		}
 		
 	});
 
+	$('#add_resource_box').hide();
+
 	$('#add_resource').click(function(){
-		$.get('', function(data){
-			$(data).dialog({
-				modal:true
-			});
-		});
+	        var dd = $(this);
+	        var p = dd.position();
+	        $('#add_resource_box').clone(true).dialog({
+	                position: [p.left, p.top],
+	                title:"Add Resource",
+	                buttons:{
+	                        'Ok':function(){
+	
+	                                $(this).dialog('destroy');
+	                        },
+	                        'Cancel':function(){
+	                                $(this).dialog('destroy');
+	                        }
+	                },
+	                draggable:false, 
+			modal:true
+	        });
 	});
+
+
 	$('.share').live('click', function(event){
 		var dd = $(this);
 		event.preventDefault();
@@ -193,7 +226,9 @@ $(function(){
 					$(this).dialog('destroy');
 					$('.sharebox').remove();
 				}
-			}
+			},
+			draggable:false,
+			modal:true
 		});
 	});
 });
@@ -214,6 +249,24 @@ $(function(){
 </div>
 <div id="resource_calendar"></div>
 <div id="footer">MMo.it</div>
+
+<div id="add_resource_box">
+	<label for="resource_name">Resource Name: </label><input type="text" name="resource_name"></input><br/>
+	<label for="resource_icon">Resouce Icon:</label>
+	<table >
+	<tr>
+		<td>
+		<input type="radio" name="resource_icon" value="generic.png"><img src="#" width="24" height="24" /></input>
+		</td>
+		<td>
+		<input type="radio" name="resource_icon" value="generic.png"><img src="#" width="24" height="24" /></input>
+		</td>
+		<td>
+		<input type="radio" name="resource_icon" value="generic.png"><img src="#" width="24" height="24" /></input>
+		</td>
+	</tr>
+	</table>
+</div>
 </body>
 
 </html>

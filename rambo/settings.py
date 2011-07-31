@@ -162,3 +162,5 @@ RESOURCE_ADDITIONAL = {
 		}
 	}
 }
+
+LOGIN_REDIRECT_URL = "/"
