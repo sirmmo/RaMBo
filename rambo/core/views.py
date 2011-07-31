@@ -70,7 +70,7 @@ def add_booking(request, user, resource):
 	data['time_end'] = request.REQUEST.get('time_end', None)
 	data['repeat'] = False	
 #	try:
-	return response(do_book_resource(request.user, resource, data))
+	return response(do_book_resource(request.user, resource, user,  data))
 #	except Exception as e:
 #		return error(str(e))
 

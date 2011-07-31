@@ -1,11 +1,11 @@
 from core.models import *
 from django.contrib.auth.models import User
 
-def do_book_resource(user,resource, booking_data):
+def do_book_resource(user,resource,owner, booking_data):
 	
 	b= Booking()
 	b.user = User.objects.get(username = user)
-	b.resource = Resource.objects.get(owner__username = user, slug = resource)
+	b.resource = Resource.objects.get(owner__username = owner, slug = resource)
 	b.description = booking_data['description']
 	b.date_start = booking_data['date_start']
 	b.date_end = booking_data['date_end']
