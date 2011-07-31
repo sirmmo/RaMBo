@@ -15,6 +15,9 @@ def index(request):
 		'get_shared_resources':reverse("get_shared_resources", kwargs={"user":request.user.username}),
 	})
 
+def register(request):
+	pass	
+
 # Create your views here.
 
 def add_booking(request):

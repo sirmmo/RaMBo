@@ -4,23 +4,20 @@ from django.contrib.auth.models import User
 def do_get_resources(user):
 	r = Resource.objects.filter(owner__username = user)
 
-	return [{'name':n.name, 'url':n.url()} for n in r]
+	return [{'name':n.name, 'url':n.url(), 'share':n.share()} for n in r]
 
 def do_get_resource(user, resource_name):
-	r = Resource.objects.get(owner__username = user, name = resource_name)
+	r = Resource.objects.get(owner__username = user, slug = resource_name)
 
-	ps = r.properties.all()
-	
-	pr = {}
-	for p in ps:
-		pr[p.name] = p.value
-	pu = {
+	pu = {	
+		'slug': str(r.slug),
 		'category':str(r.category),
 		'owner':str(r.owner),
 		'name':str(r.name),
 		'icon':str(r.icon),
 		'url':r.url(),
-		'properties':pr,
+		'share':r.share(),
+		'bookings':r.url()
 	}
 	return pu
 def get_template():
@@ -64,6 +61,6 @@ def do_remove_category(user, name):
 def do_get_shared_resources(user):
 	r_set = set()
 	for uc in UserConnection.objects.filter(target__username = user):
-		r_set.update(uc.shared_resources.all())
+		r_set.add(uc.shared_resource)
 	return [{'name':n.name, 'url':n.url(), 'owner':n.owner.username} for n in r_set]
 	

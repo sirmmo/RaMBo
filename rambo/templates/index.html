@@ -9,6 +9,7 @@
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/ui-lightness/jquery-ui.css" type="text/css" rel="Stylesheet" />
 
 <link rel="stylesheet" type="text/css" href="http://arshaw.com/js/fullcalendar-1.5.1/fullcalendar/fullcalendar.css" />
+<link href='http://fonts.googleapis.com/css?family=Dawning+of+a+New+Day|Meddon' rel='stylesheet' type='text/css'>
 <style>
 body{
 	margin:0 0 0 0;
@@ -17,6 +18,9 @@ body{
 #header{
 	height:100px;
 	display:block;
+	font-family: 'Dawning of a New Day', cursive;
+	font-size:70px;
+	padding-left:25px;
 }
 #footer{
 	display:block;
@@ -44,17 +48,28 @@ body{
 	width:16px;
 	height:16px;
 }
+.share{
+	float:right;	
+	padding-right:16px;
+}
 </style>
 <script>
 render_resource = function(data){
 	var r = $("<li></li>");
 	var a = $("<a></a>");
 	if ('owner' in data)
-	r.append(data['owner'] + ": ");
+		r.append(data['owner'] + ": ");
 	a.attr('href',"#"+ data['url']);
 	a.attr('class', 'resource');
 	a.append(data['name']);
 	r.append(a);
+	if (!('owner' in data)){
+		var s = $('<a></a>');
+		s.append('share');
+		s.attr('href', '#'+data['share']);
+		s.attr('class', 'share');
+		r.append(s);
+	}
 	return r;
 }
 
@@ -77,36 +92,56 @@ get_data = function(data){
 		return data['content']
 }
 
+drag_start = function(event, ui){
+	var el = $(event.srcElement);
+	url = el.attr('href').split('#')[1];
+	$.getJSON(url, function(data){
+		/*setup calendar*/
+	});
+}
+
 $(function(){
 		
 
 	$.getJSON('{{get_user_resources}}', function(data){
-	if(data['type'] == "response"){
-	$('#own_resources').append(render_resources(data['content']));
-	$('.resource').draggable({
-		revert:true,
-		revertDuration:0
+		if(data['type'] == "response"){
+			$('#own_resources').append(render_resources(data['content']));
+			$('.resource').draggable({
+				revert:true,
+				revertDuration:0,
+				start:drag_start
+			});	
+		}else;		
 	});
-	}else;		
-	});
+	
 	$.getJSON('{{get_shared_resources}}', function(data){
-	if(data['type'] == "response")
-	{$('#shared_resources').append(render_resources(data['content']));
-	$('.resource').draggable({
-		revert:true,
-		revertDuration:0
+		if(data['type'] == "response"){
+			$('#shared_resources').append(render_resources(data['content']));
+			$('.resource').draggable({
+				revert:true,
+				revertDuration:0,
+				start:drag_start
+			});
+		}else;
 	});
-	}else;
-	});
+	
 	$(window).hashchange(function(){
 		nurl = location.hash.split('#')[1];
-		alert(nurl);
+		$.getJSON(nurl, function(data){
+			alert(data);
+		});
 	});
 	$('#resource_calendar').fullCalendar({
 		droppable:true,
 		dropaccept:".resource",
 		drop: function(date, allDay){
 			alert("Dropped " +$(this).attr('href')+ " on " + date + " with allDay=" + allDay);
+		},
+		defaultView:'agendaWeek',
+		header:{
+			left:'title',
+			center:'month,agendaWeek,agendaDay',
+			right:  'today prev,next'
 		}
 	});
 
@@ -115,6 +150,35 @@ $(function(){
 			$(data).dialog({
 				modal:true
 			});
+		});
+	});
+	$('.share').live('click', function(event){
+		var dd = $(this);
+		event.preventDefault();
+		var t = $("<div></div>");
+		t.addClass('sharebox');
+		var i = $("<input></input>");
+		i.attr('type', 'text');
+		t.append(i);
+		var p = dd.position();
+		t.dialog({
+			position:[p.left, p.top],
+			title:"Share",
+			buttons:{
+				"Ok":function(){
+					var url = dd.attr('href').split('#')[1];
+					var user = $(this).find('input').val();
+					$.getJSON(url, {"user":user}, function(data){
+						/*do stuff*/
+						$(this).dialog('destroy');
+						$('.sharebox').remove();
+					});
+				},
+				"Cancel":function(){
+					$(this).dialog('destroy');
+					$('.sharebox').remove();
+				}
+			}
 		});
 	});
 });
