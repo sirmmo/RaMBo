@@ -135,14 +135,27 @@ $(function(){
 		droppable:true,
 		dropaccept:".resource",
 		drop: function(date, allDay){
+			var h = $(this).attr('href').split('#')[1];
 			alert("Dropped " +$(this).attr('href')+ " on " + date + " with allDay=" + allDay);
+			$.getJSON(h, function(data){
+				var date_string = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
+				var time_string = date.getHours() + ":" + date.getMinutes();
+				var new_url = data['add_booking'];
+				$.getJSON(new_url, {
+					'date_start':date_string, 
+					'time_start':time_string
+				});	
+			});
 		},
 		defaultView:'agendaWeek',
 		header:{
 			left:'title',
 			center:'month,agendaWeek,agendaDay',
 			right:  'today prev,next'
-		}
+		},
+		selectable:true,
+		selectHelper:true
+		
 	});
 
 	$('#add_resource').click(function(){
@@ -157,9 +170,10 @@ $(function(){
 		event.preventDefault();
 		var t = $("<div></div>");
 		t.addClass('sharebox');
-		var i = $("<input></input>");
-		i.attr('type', 'text');
+		var i = $("<label for='share_user'>Username:</label><input name='share_user' class='share_user' type='text'></input>");
 		t.append(i);
+		var c = $("<label for='share_details'>Share details:</label><input name='share_details' class='share_details' type='checkbox'></input>");
+		t.append(c);
 		var p = dd.position();
 		t.dialog({
 			position:[p.left, p.top],
@@ -167,8 +181,9 @@ $(function(){
 			buttons:{
 				"Ok":function(){
 					var url = dd.attr('href').split('#')[1];
-					var user = $(this).find('input').val();
-					$.getJSON(url, {"user":user}, function(data){
+					var user = $(this).find('.share_user').val();
+					var share = $(this).find('.share_details:checked').length == 1 ;
+					$.getJSON(url, {"with":user, 'transparent':share}, function(data){
 						/*do stuff*/
 						$(this).dialog('destroy');
 						$('.sharebox').remove();

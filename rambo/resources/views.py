@@ -71,23 +71,21 @@ def get_categories(request):
 		return error(str(e))
 
 @login_required
-def edit_category(request, category):
-	pass
-@login_required
-def edit_resource(request,resource):
-	pass
-
-
-@login_required
-def send_share_request(request, user):
-        pass
-@login_required
-def respond_share_request(request):
+def share_resource(request, user, resource):
+	share_with = request.REQUEST.get('with', None)
+	transparent = request.REQUEST.get('transparent', "false")
+	transparent = transparent == "true"
+	
+	if share_with:
+		try:
+			return response(do_share_resource(request.user.username, share_with, resource, transparent))
+		except Exception as e:
+			return error(str(e))
         pass
 
 @login_required
 def get_shared_resources(request, user):
-        try:
+	try:
 		return response(do_get_shared_resources(request.user.username))
 	except Exception as e:
 		return error(str(e))

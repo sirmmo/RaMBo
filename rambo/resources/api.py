@@ -1,6 +1,6 @@
 from resources.models import *
 from django.contrib.auth.models import User
-
+from settings import RESOURCE_ADDITIONAL
 def do_get_resources(user):
 	r = Resource.objects.filter(owner__username = user)
 
@@ -8,7 +8,7 @@ def do_get_resources(user):
 
 def do_get_resource(user, resource_name):
 	r = Resource.objects.get(owner__username = user, slug = resource_name)
-
+	
 	pu = {	
 		'slug': str(r.slug),
 		'category':str(r.category),
@@ -17,8 +17,17 @@ def do_get_resource(user, resource_name):
 		'icon':str(r.icon),
 		'url':r.url(),
 		'share':r.share(),
-		'bookings':r.url()
 	}
+	for (k,v) in RESOURCE_ADDITIONAL.items():
+		kw = RESOURCE_ADDITIONAL[k]['kwargs']
+		ka = {}
+		for q in kw:
+			if q == "user":
+				val = user
+			if q == "resource":
+				val = resource_name
+			ka[q]=val		
+		pu[k] = reverse(RESOURCE_ADDITIONAL[k]['reverse'], kwargs = ka)
 	return pu
 def get_template():
 	return {'name':'', 'icon':'','category':''}
@@ -56,7 +65,16 @@ def do_remove_category(user, name):
 
 
 
+def do_share_resource(owner, other, resource, transparent=False):
+	owner = User.objects.get(username = owner)
+	other = User.objects.get(username = other)
 
+	uc = UserConnection()
+	uc.owner = owner
+	uc.target = other
+	uc.shared_resource = Resource.objects.get(owner=owner, slug=resource)
+	uc.transparent_share = transparent
+	uc.save()
 
 def do_get_shared_resources(user):
 	r_set = set()

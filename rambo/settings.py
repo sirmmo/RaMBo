@@ -144,3 +144,21 @@ LOGGING = {
         },
     }
 }
+
+
+RESOURCE_ADDITIONAL = {
+	'booking_url':{
+		'reverse':'booking_url',
+		'kwargs':{
+			'user':'', 
+			'resource':''
+		}
+	},
+	'add_booking':{
+		'reverse':'add_booking',
+		'kwargs':{
+			'user':'',
+			'resource':''
+		}
+	}
+}
