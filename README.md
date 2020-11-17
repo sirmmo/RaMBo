@@ -1,0 +1,2 @@
+# RaMBo
+Resource Booking Manager
